@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kimyo Lab - VR Test</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #000000;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: rgba(10, 15, 20, 0.9);
+            backdrop-filter: blur(15px);
+            padding: 40px;
+            border-radius: 12px;
+            border: 3px solid #00d2ff;
+            box-shadow: 0 0 40px rgba(0, 210, 255, 0.15), inset 0 0 20px rgba(0, 210, 255, 0.1);
+            text-align: center;
+            width: 480px;
+            max-width: 92%;
+            transition: transform 0.3s ease, opacity 0.5s ease;
+            z-index: 10;
+            margin: 30px auto;
+        }
+
+        .icon {
+            font-size: 55px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(0, 210, 255, 0.8);
+        }
+
+        h2 {
+            margin-bottom: 15px;
+            color: #ffffff;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-size: 22px;
+            text-shadow: 0 0 10px rgba(0, 210, 255, 0.4);
+        }
+
+        p.description {
+            color: #00d2ff;
+            font-size: 15px;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
+        }
+
+        #question-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            min-height: 60px;
+            text-align: left;
+        }
+
+        .options-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            width: 100%;
+            padding: 15px;
+            background: #050a0f;
+            border: 2px solid rgba(0, 210, 255, 0.3);
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 16px;
+            outline: none;
+            transition: 0.2s;
+            cursor: pointer;
+            letter-spacing: 1px;
+            text-align: left;
+            padding-left: 20px;
+        }
+
+        .option-btn:hover {
+            border-color: #00d2ff;
+            background: rgba(0, 210, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .option-btn.selected {
+            background: rgba(0, 210, 255, 0.3);
+            border-color: #00d2ff;
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
+            font-weight: bold;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            border: 2px solid #00d2ff;
+            color: #00d2ff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            letter-spacing: 1px;
+            transition: 0.2s;
+            text-transform: uppercase;
+        }
+
+        .nav-btn:hover:not(:disabled) {
+            background: rgba(0, 210, 255, 0.15);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+        }
+
+        .nav-btn:disabled {
+            border-color: #333;
+            color: #555;
+            cursor: not-allowed;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        button.action-btn {
+            width: 100%;
+            padding: 16px;
+            background: #00d2ff;
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        button.action-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.6);
+            background: #33dbff;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .progress {
+            color: #00d2ff;
+            font-size: 14px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        /* Progress bar */
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: rgba(0, 210, 255, 0.15);
+            border-radius: 3px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: #00d2ff;
+            box-shadow: 0 0 10px rgba(0, 210, 255, 0.6);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        /* Results detail breakdown */
+        .results-summary {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            gap: 15px;
+        }
+        .result-stat {
+            flex: 1;
+            padding: 15px 10px;
+            background: rgba(0, 210, 255, 0.08);
+            border: 1px solid rgba(0, 210, 255, 0.3);
+            border-radius: 8px;
+        }
+        .result-stat .num {
+            font-size: 28px;
+            font-weight: bold;
+            color: #00d2ff;
+            text-shadow: 0 0 12px rgba(0, 210, 255, 0.5);
+        }
+        .result-stat .label {
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="start-container">
+        <div class="icon">⚗️</div>
+        <h2>BILIMNI TEKSHIRISH</h2>
+        <p class="description">Tabiiy gaz va gaz kondensatini qayta ishlash texnologiyasi. Savollar soni: 50 ta.</p>
+        <button class="action-btn" onclick="startQuiz()">TESTNI BOSHLASH</button>
+    </div>
+
+    <div class="container hidden" id="quiz-container">
+        <div class="progress" id="progress-text">SAVOL 1 / 50</div>
+        <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill"></div></div>
+        <div id="question-text">Savol matni shu yerda chiqadi?</div>
+
+        <div class="options-grid" id="options-container"></div>
+
+        <div class="nav-buttons">
+            <button class="nav-btn" id="prev-btn" onclick="goPrev()">🡨 Oldingisi</button>
+            <button class="nav-btn" id="next-btn" onclick="goNext()">Keyingisi 🡪</button>
+        </div>
+    </div>
+
+    <div class="container hidden" id="result-container">
+        <div class="icon">✨</div>
+        <h2>TEST YAKUNLANDI</h2>
+        <p class="description" style="font-size: 22px; color: #ffffff; margin-bottom: 10px;" id="score-text">Sizning natijangiz: 0 / 50</p>
+        <div class="results-summary">
+            <div class="result-stat"><div class="num" id="stat-correct">0</div><div class="label">TO'G'RI</div></div>
+            <div class="result-stat"><div class="num" id="stat-wrong">0</div><div class="label">XATO</div></div>
+            <div class="result-stat"><div class="num" id="stat-percent">0%</div><div class="label">FOIZ</div></div>
+        </div>
+        <button class="action-btn" onclick="restartQuiz()">QAYTA TOPSHIRISH</button>
+    </div>
+
+    <script>
+        // ====== QUIZ DATA ======
+const quizData = [
+            { question: "1. Tabiiy gazning asosiy tarkibiy qismi qaysi?", options: ["Propan", "Butan", "Metan", "Etan"], correct: 2 },
+            { question: "2. Gaz sanoatining iqtisodiyotdagi asosiy ahamiyati nimada?", options: ["Suv ishlab chiqarish", "Energiya manbai", "Metall ishlab chiqarish", "Yog‘ ishlab chiqarish"], correct: 1 },
+            { question: "3. Tabiiy gazlar tasnifi nimaga asoslanadi?", options: ["Rangiga", "Tarkibiga", "Haroratiga", "Bosimiga"], correct: 1 },
+            { question: "4. Gazning bosim, hajm va harorat o‘rtasidagi bog‘lanish qaysi qonun bilan ifodalanadi?", options: ["Nyuton qonuni", "Boyle-Mariotte qonuni", "Ohm qonuni", "Arximed qonuni"], correct: 1 },
+            { question: "5. Ideal gaz qonuni formulasi qaysi?", options: ["F=ma", "PV=nRT", "Q=mcΔt", "U=IR"], correct: 1 },
+            { question: "6. Gaz sanoati mahsulotlariga qaysi kiradi?", options: ["Benzin", "LPG", "Suv", "Qog‘oz"], correct: 1 },
+            { question: "7. Suyultirilgan gaz (LPG) asosan nimadan iborat?", options: ["Metan", "Propan-butan", "Etan", "Azot"], correct: 1 },
+            { question: "8. Gazdagi mexanik qo‘shimchalar nimaga olib keladi?", options: ["Tozalikka", "Jihozlarning yeyilishiga", "Bosim oshishiga", "Rang o‘zgarishiga"], correct: 1 },
+            { question: "9. Gazlarni mexanik tozalash apparatiga qaysi kiradi?", options: ["Filtr", "Nasos", "Generator", "Transformator"], correct: 0 },
+            { question: "10. Separatsiya nima?", options: ["Aralashtirish", "Ajratish", "Qizdirish", "Sovutish"], correct: 1 },
+            { question: "11. Quyi haroratli separatsiya nimaga asoslanadi?", options: ["Bosim oshishiga", "Harorat pasayishiga", "Rang o‘zgarishiga", "Zichlikka"], correct: 1 },
+            { question: "12. Turbodetander vazifasi nimadan iborat?", options: ["Qizdirish", "Sovutish va bosimni kamaytirish", "Filtrlash", "Aralashtirish"], correct: 1 },
+            { question: "13. Kompressor nima qiladi?", options: ["Bosimni kamaytiradi", "Bosimni oshiradi", "Haroratni tushiradi", "Rangni o‘zgartiradi"], correct: 1 },
+            { question: "14. Nordon gaz tarkibiga qaysi kiradi?", options: ["O₂", "CO₂ va H₂S", "N₂", "Ar"], correct: 1 },
+            { question: "15. Alkanolaminlar nimaga ishlatiladi?", options: ["Sovutish", "Tozalash", "Qizdirish", "Siqish"], correct: 1 },
+            { question: "16. Adsorbsiya jarayoni nimani anglatadi?", options: ["Eritish", "Yuzada yutilish", "Qizdirish", "Ajratish"], correct: 1 },
+            { question: "17. Adsorbentlarga misol:", options: ["Suv", "Silikagel", "Benzin", "Yog‘"], correct: 1 },
+            { question: "18. Absorbsiya nimani anglatadi?", options: ["Yuzada yutilish", "Hajmda yutilish", "Qizdirish", "Sovutish"], correct: 1 },
+            { question: "19. Gazlarni quritish nimani bildiradi?", options: ["Sovutish", "Namlikni yo‘qotish", "Bosim oshirish", "Rang o‘zgartirish"], correct: 1 },
+            { question: "20. Glikol nima uchun ishlatiladi?", options: ["Sovutish", "Quritish", "Siqish", "Filtrlash"], correct: 1 },
+            { question: "21. Adsorbsion quritish qaysi jarayon?", options: ["Kimyoviy", "Fizik", "Biologik", "Mexanik"], correct: 1 },
+            { question: "22. Suyultirilgan gazlarni quritishda qaysi usul ishlatiladi?", options: ["Adsorbsion", "Elektr", "Mexanik", "Termik"], correct: 0 },
+            { question: "23. Vodorod sulfidi formulasi:", options: ["H₂O", "H₂S", "CO₂", "NH₃"], correct: 1 },
+            { question: "24. Klaus jarayoni nimaga xizmat qiladi?", options: ["Gazni sovutish", "Oltingugurt olish", "Bosim oshirish", "Quritish"], correct: 1 },
+            { question: "25. Oltingugurt qayerda ishlatiladi?", options: ["Metallurgiya", "Kimyo sanoati", "Energetika", "Barchasi"], correct: 3 },
+            { question: "26. Gazlarni fraksiyalash nima?", options: ["Aralashtirish", "Ajratish", "Qizdirish", "Sovutish"], correct: 1 },
+            { question: "27. Geliy qaysi gazdan olinadi?", options: ["Suvdan", "Tabiiy gazdan", "Havodan", "Yog‘dan"], correct: 1 },
+            { question: "28. Geliy xossasi:", options: ["Yonuvchi", "Inert", "Rangli", "Og‘ir"], correct: 1 },
+            { question: "29. Gazlarni suyultirish nimaga asoslanadi?", options: ["Sovutishga", "Qizdirishga", "Aralashtirishga", "Filtrlashga"], correct: 0 },
+            { question: "30. Kaskadli sovutish nima?", options: ["Bir bosqichli", "Ko‘p bosqichli sovutish", "Qizdirish", "Filtrlash"], correct: 1 },
+            { question: "31. Gazkimyo sanoatining xomashyosi:", options: ["Suv", "Tabiiy gaz", "Metall", "Yog‘"], correct: 1 },
+            { question: "32. Gaz sanoatining istiqbolli yo‘nalishi:", options: ["Energetika", "Gazkimyo", "Metallurgiya", "Qishloq xo‘jaligi"], correct: 1 },
+            { question: "33. Gaz zichligi nimaga bog‘liq?", options: ["Rangga", "Harorat va bosimga", "Hajmga", "Rangga"], correct: 1 },
+            { question: "34. Gazlarning asosiy xossasi:", options: ["Qattiqlik", "Siqiluvchanlik", "Ranglilik", "Oqimlilik"], correct: 1 },
+            { question: "35. Gazlarni ajratishda asosiy usul:", options: ["Filtrlash", "Separatsiya", "Qizdirish", "Aralashtirish"], correct: 1 },
+            { question: "36. Absorbsiya apparati:", options: ["Kolonna", "Nasos", "Generator", "Transformator"], correct: 0 },
+            { question: "37. Adsorbsiya apparati:", options: ["Filtr", "Adsorber", "Nasos", "Kompressor"], correct: 1 },
+            { question: "38. Gazni quritish maqsadi:", options: ["Rang o‘zgartirish", "Namlikni yo‘qotish", "Bosimni kamaytirish", "Haroratni oshirish"], correct: 1 },
+            { question: "39. Yo‘ldosh gaz nima?", options: ["Asosiy gaz", "Yon mahsulot gaz", "Suv", "Havodan iborat gaz"], correct: 1 },
+            { question: "40. Gazni tozalash usuli:", options: ["Mexanik", "Kimyoviy", "Fizik", "Barchasi"], correct: 3 },
+            { question: "41. Gazning issiqlik qiymati nimaga bog‘liq?", options: ["Rangga", "Tarkibiga", "Hajmga", "Bosimga"], correct: 1 },
+            { question: "42. Gazlarni tozalashning maqsadi:", options: ["Bosim oshirish", "Zararli moddalarni yo‘qotish", "Harorat oshirish", "Rangni o‘zgartirish"], correct: 1 },
+            { question: "43. Kondensat nima?", options: ["Gaz", "Suyuqlik", "Qattiq modda", "Aralashma"], correct: 1 },
+            { question: "44. Gaz sanoatining asosiy mahsuloti:", options: ["Elektr", "Gaz", "Suv", "Yog‘"], correct: 1 },
+            { question: "45. Gazlarni sovutish usuli:", options: ["Kompressiya", "Ekspansiya", "Filtrlash", "Qizdirish"], correct: 1 },
+            { question: "46. Gazlar qanday modda?", options: ["Qattiq", "Suyuqlik", "Gaz", "Plazma"], correct: 2 },
+            { question: "47. Gazlarni ajratish jarayonida nima muhim?", options: ["Rang", "Bosim va harorat", "Shakl", "Hajm"], correct: 1 },
+            { question: "48. Gaz sanoatida xavfsizlik nimaga bog‘liq?", options: ["Rangga", "Texnologiyaga", "Haroratga", "Shaklga"], correct: 1 },
+            { question: "49. Gazlarni tozalashning asosiy usullari:", options: ["Fizik", "Kimyoviy", "Mexanik", "Barchasi"], correct: 3 },
+            { question: "50. Gaz sanoatining iqtisodiy ahamiyati:", options: ["Past", "O‘rta", "Yuqori", "Ahmiyatsiz"], correct: 2 },
+        ];
+
+        // ====== STATE ======
+        let currentQuestion = 0;
+        let userAnswers = new Array(quizData.length).fill(null);
+
+        const startContainer = document.getElementById('start-container');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultContainer = document.getElementById('result-container');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const progressText = document.getElementById('progress-text');
+        const progressFill = document.getElementById('progress-fill');
+        const scoreText = document.getElementById('score-text');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+
+        // ====== SOUND EFFECTS (yengil, sci-fi atmosferasiga mos) ======
+        let audioCtx = null;
+
+        function playSound(type) {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            if (type === 'click') {
+                // Yengil "tip" — variant yoki navigatsiya bosilganda
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                const filter = audioCtx.createBiquadFilter();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(720, audioCtx.currentTime);
+
+                filter.type = 'highpass';
+                filter.frequency.setValueAtTime(500, audioCtx.currentTime);
+
+                gain.gain.setValueAtTime(0.06, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
+
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(audioCtx.currentTime);
+                osc.stop(audioCtx.currentTime + 0.06);
+
+            } else if (type === 'select') {
+                // Variant tanlanganda — biroz balandroq, tasdiqlovchi
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                osc.frequency.linearRampToValueAtTime(1100, audioCtx.currentTime + 0.05);
+
+                gain.gain.setValueAtTime(0.07, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(audioCtx.currentTime);
+                osc.stop(audioCtx.currentTime + 0.1);
+
+            } else if (type === 'start') {
+                // Test boshlanganda — qisqa "boot up" ohangi
+                const notes = [440, 660];
+                notes.forEach((f, i) => {
+                    setTimeout(() => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        o.type = 'sine';
+                        o.frequency.setValueAtTime(f, audioCtx.currentTime);
+                        g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
+                        o.connect(g);
+                        g.connect(audioCtx.destination);
+                        o.start(audioCtx.currentTime);
+                        o.stop(audioCtx.currentTime + 0.18);
+                    }, i * 110);
+                });
+
+            } else if (type === 'finish') {
+                // Test yakunlanganda — uch notali yengil arpeggio
+                const notes = [523, 659, 784];
+                notes.forEach((f, i) => {
+                    setTimeout(() => {
+                        const o = audioCtx.createOscillator();
+                        const g = audioCtx.createGain();
+                        const filter = audioCtx.createBiquadFilter();
+                        o.type = 'sine';
+                        o.frequency.setValueAtTime(f, audioCtx.currentTime);
+                        filter.type = 'highpass';
+                        filter.frequency.setValueAtTime(400, audioCtx.currentTime);
+                        g.gain.setValueAtTime(0.11, audioCtx.currentTime);
+                        g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+                        o.connect(filter);
+                        filter.connect(g);
+                        g.connect(audioCtx.destination);
+                        o.start(audioCtx.currentTime);
+                        o.stop(audioCtx.currentTime + 0.2);
+                    }, i * 100);
+                });
+            }
+        }
+
+        // ====== QUIZ LOGIC ======
+        function startQuiz() {
+            playSound('start');
+            startContainer.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            currentQuestion = 0;
+            userAnswers.fill(null);
+            loadQuestion();
+        }
+
+        function restartQuiz() {
+            playSound('click');
+            resultContainer.classList.add('hidden');
+            startContainer.classList.remove('hidden');
+            currentQuestion = 0;
+            userAnswers.fill(null);
+        }
+
+        function loadQuestion() {
+            const q = quizData[currentQuestion];
+            questionText.innerText = q.question;
+            progressText.innerText = `SAVOL ${currentQuestion + 1} / ${quizData.length}`;
+
+            const pct = ((currentQuestion + 1) / quizData.length) * 100;
+            progressFill.style.width = pct + '%';
+
+            optionsContainer.innerHTML = '';
+            const letters = ['A', 'B', 'C', 'D'];
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.innerText = `${letters[idx]}) ${opt}`;
+                btn.classList.add('option-btn');
+                if (userAnswers[currentQuestion] === idx) {
+                    btn.classList.add('selected');
+                }
+                btn.onclick = () => selectAnswer(idx);
+                optionsContainer.appendChild(btn);
+            });
+
+            prevBtn.disabled = currentQuestion === 0;
+            nextBtn.innerText = (currentQuestion === quizData.length - 1)
+                ? 'YAKUNLASH ✔'
+                : 'Keyingisi 🡪';
+        }
+
+        function selectAnswer(idx) {
+            playSound('select');
+            userAnswers[currentQuestion] = idx;
+            loadQuestion();
+        }
+
+        function goNext() {
+            playSound('click');
+            if (currentQuestion < quizData.length - 1) {
+                currentQuestion++;
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function goPrev() {
+            playSound('click');
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                loadQuestion();
+            }
+        }
+
+        function showResults() {
+            let correct = 0;
+            for (let i = 0; i < quizData.length; i++) {
+                if (userAnswers[i] === quizData[i].correct) correct++;
+            }
+            const wrong = quizData.length - correct;
+            const pct = Math.round((correct / quizData.length) * 100);
+
+            quizContainer.classList.add('hidden');
+            resultContainer.classList.remove('hidden');
+            scoreText.innerText = `Sizning natijangiz: ${correct} / ${quizData.length}`;
+            document.getElementById('stat-correct').innerText = correct;
+            document.getElementById('stat-wrong').innerText = wrong;
+            document.getElementById('stat-percent').innerText = pct + '%';
+
+            playSound('finish');
+        }
+    </script>
+</body>
+</html>
